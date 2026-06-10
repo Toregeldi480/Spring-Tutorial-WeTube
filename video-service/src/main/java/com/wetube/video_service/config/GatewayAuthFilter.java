@@ -1,0 +1,32 @@
+package com.wetube.video_service.config;
+
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.stereotype.Component;
+import org.springframework.web.filter.OncePerRequestFilter;
+
+import java.io.IOException;
+
+@Component
+public class GatewayAuthFilter extends OncePerRequestFilter {
+    private final GatewayConfiguration applicationConfiguration;
+
+    public GatewayAuthFilter(GatewayConfiguration appConfig) {
+        this.applicationConfiguration = appConfig;
+    }
+
+    @Override
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+        String token = request.getHeader("X-Gateway-Token");
+
+        if (token == null || !token.equals(applicationConfiguration.getGatewayToken())) {
+            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            response.getWriter().write("Direct Access Not Allowed");
+            return;
+        }
+
+        filterChain.doFilter(request, response);
+    }
+}
