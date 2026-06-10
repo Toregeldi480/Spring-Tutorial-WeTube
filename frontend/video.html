@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="styles/video.css">
+  <title>Video</title>
+</head>
+<body>
+  <div class="container">
+    <div class="top-bar">
+      <div class="search-container">
+        <input type="search" name="search-box" id="search-box">
+        <button id="search-button">🔍</button>
+      </div>
+      <div class="actions-container"> 
+        <div id="logged">
+          <button id="upload">Upload Video</button>
+          <a href="./profile.html" class="profile-link">
+            <div class="profile-icon-container">
+              <img src="./assets/profile-icon.jpeg" alt="profile icon" id="profile-icon">
+            </div>
+          </a>
+        </div>
+        <div id="not-logged">
+          <a href="./login.html" class="login-link">Login</a>
+        </div>
+        <a href="./home.html" class="home-link">
+          <div class="home-link-icon">
+            🏠
+          </div>
+        </a>
+      </div>
+    </div>
+
+    <div id="upload_block">
+      <div id="upload_block_inner">
+        <form method="POST" enctype="multipart/form-data" action="http://localhost:8080/video/upload" id="upload_form">
+          <input class="upload_element" type="file" name="file" accept="video/*" required>
+          <input class="upload_element" type="text" name="title" placeholder="Title" required>
+          <textarea class="upload_element" name="description" placeholder="Description"></textarea>
+          <button class="upload_button" type="submit">Upload Video</button>
+        </form>
+        <button class="upload_button" id="upload_cancel">Cancel</button>
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="video-container">
+        <video id="video" controls></video>
+        <div class="controls">
+          <label for="quality-selector" class="quality-label">Quality:</label>
+          <select id="quality-selector">
+            <option value="-1">Auto</option>
+          </select>
+          <span id="current-quality" class="resolution-badge">Auto</span>
+        </div>
+      </div>
+
+      <div class="video-list-container">
+        <ul id="video-list"> 
+        </ul>
+      </div>
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+  <script src="scripts/video-list.js"></script>
+  <script src="scripts/video-player.js"></script>
+  <script src="scripts/video-upload.js"></script>
+</body>
+</html>

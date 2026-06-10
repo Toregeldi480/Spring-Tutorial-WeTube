@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="styles/profile.css">
+  <title>profile</title>
+</head>
+<body> 
+  <div class="container">
+    <div class="main">
+      <div id="logged">
+        <div class="logged-list">
+          <div class="logged-item">
+            Username:
+            <div id="profile_username">
+
+            </div>
+          </div>
+          <div class="logged-item">
+            Email:
+            <div id="profile_email">
+
+            </div>
+          </div>
+        </div> 
+        <div class="logged-list logged-options">
+          <button type="button" id="logout">
+            Log Out
+          </button>
+        </div>
+      </div> 
+      <div id="not-logged">
+        <a href="./login.html" id="authorize_link">
+          Register/Login
+        </a>
+      </div>
+    </div>
+  </div> 
+
+  <script src="scripts/profile.js"></script>
+</body>
+</html>

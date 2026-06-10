@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="styles/login.css" rel="stylesheet">
+  <title>login</title>
+</head>
+<body>
+  <div class="container">
+    <main class="main">
+      <section class="auth">
+        <div class="auth_inner">
+          <div class="auth_block" id="login_block">
+            <h2 class="auth_header">LOGIN</h2>
+            <form class="auth_form" id="login_form">
+              <div id="login_error-message" class="error-message"></div>
+              <input class="auth_username auth_element login_element" type="text" id="login_username" placeholder="username">
+              <input class="auth_password auth_element login_element" type="password" id="login_password" placeholder="password"> 
+            </form>
+            <button class="auth_button auth_element login_element" id="login_button">Log In</button>
+            <div class="auth_text" id="login_text">
+              Dont have an account? <button class="auth_text-button" id="login_to_signup">Sign up</button> 
+            </div>
+          </div> 
+          <div class="auth_block" id="signup_block">
+            <h2 class="auth_header">SIGN UP</h2> 
+            <form class="auth_form" id="signup_form">
+              <div id="signup_error-message" class="error-message"></div>
+              <input class="auth_username auth_element signup_element auth_input" type="text" id="signup_username" placeholder="username">
+              <input class="auth_email auth_element signup_element auth_input" type="email" id="signup_email" placeholder="email"> 
+              <input class="auth_password auth_element signup_element auth_input" type="password" id="signup_password" placeholder="password">
+            </form>
+            <button class="auth_button auth_element signup_element" id="signup_button">Sign Up</button>
+            <div class="auth_text" id="signup_text">
+              Already have an account? <button class="auth_text-button" id="signup_to_login">Log in</button>
+            </div> 
+          </div> 
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="scripts/login.js"></script>
+</body>
+</html>
