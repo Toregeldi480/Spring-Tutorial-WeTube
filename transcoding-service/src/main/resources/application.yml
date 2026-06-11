@@ -1,0 +1,25 @@
+server:
+  port: 8084
+
+spring:
+  application:
+    name: transcoding-service
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: transcoding-group
+    listener:
+      missing-topic-fatal: false
+  security:
+    user:
+      name: admin
+      password: admin123
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+
+gateway:
+  token: mBuIFTo+SjyJOXeNN75zeGIUD6InWfcgwoRp2llZXgs=
+  

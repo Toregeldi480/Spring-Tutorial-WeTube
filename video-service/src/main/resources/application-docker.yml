@@ -1,0 +1,12 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://postgres:5432/wetube?currentSchema=video_service
+    username: admin
+    password: admin123
+  kafka:
+    bootstrap-servers: kafka:9093
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://registry-service:8761/eureka

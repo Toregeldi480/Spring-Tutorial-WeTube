@@ -1,0 +1,40 @@
+server:
+  port: 8082
+
+spring:
+  application:
+    name: video-service
+    root-location: /app/videos
+  datasource:
+    url: jdbc:postgresql://localhost:5432/wetube?currentSchema=video_service
+    username: admin
+    password: admin123
+    driver-class-name: org.postgresql.Driver
+  servlet:
+    multipart:
+      max-file-size: 1000MB
+      max-request-size: 1000MB
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: transcoding-group
+    listener:
+      missing-topic-fatal: false
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+    register-with-eureka: true
+    fetch-registry: true
+  instance:
+    prefer-ip-address: true
+
+gateway:
+  token: mBuIFTo+SjyJOXeNN75zeGIUD6InWfcgwoRp2llZXgs=

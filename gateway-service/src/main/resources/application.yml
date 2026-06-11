@@ -1,0 +1,22 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: gateway-service
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+    register-with-eureka: true
+    fetch-registry: true
+  instance:
+    prefer-ip-address: true
+
+gateway:
+  token: mBuIFTo+SjyJOXeNN75zeGIUD6InWfcgwoRp2llZXgs=
+
+security:
+  jwt:
+    secret: a111396840caddbdd1b160c64045ebb68baf11ba0cf4996e8526ceb3c67d570b

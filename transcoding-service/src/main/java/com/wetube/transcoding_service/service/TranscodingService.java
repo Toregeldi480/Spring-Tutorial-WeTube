@@ -16,6 +16,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class TranscodingService {
@@ -38,6 +39,7 @@ public class TranscodingService {
             generateHLSStream(videoPath, outputDir, videoId);
             updateStatus(videoId, "READY");
         } catch (Exception e) {
+            updateStatus(videoId, "FAILED");
             throw new RuntimeException(e);
         }
     }
@@ -54,99 +56,141 @@ public class TranscodingService {
     private void generateHLSStream(Path videoPath, Path outputDir, String videoId) throws Exception {
         boolean hasAudio = checkIfVideoHasAudio(videoPath);
 
+        for (int i = 0; i < 3; i++) {
+            Files.createDirectories(outputDir.resolve("stream_" + i));
+        }
+
+        try {
+            System.out.println("Starting 1080p variant...");
+            encodeVariant(videoPath, outputDir, 0, 1920, 1080, "5000k", "7500k", "10000k", "60",
+                    hasAudio ? "192k" : null);
+
+            System.out.println("Starting 720p variant...");
+            encodeVariant(videoPath, outputDir, 1, 1280, 720, "2800k", "4200k", "5600k", "60",
+                    hasAudio ? "128k" : null);
+
+            System.out.println("Starting 480p variant...");
+            encodeVariant(videoPath, outputDir, 2, 854, 480, "1400k", "2100k", "2800k", "30", hasAudio ? "96k" : null);
+        } catch (Exception e) {
+            updateStatus(videoId, "FAILED");
+            throw new RuntimeException(e);
+        }
+
+        createMasterPlaylist(outputDir, hasAudio);
+        updateStatus(videoId, "READY");
+
+        System.out.println("All transcoding finished for video: " + videoId);
+    }
+
+    private void encodeVariant(Path videoPath, Path outputDir, int index,
+            int width, int height, String bitrate,
+            String maxrate, String bufsize, String framerate,
+            String audioBitrate) throws Exception {
         List<String> command = new ArrayList<>();
         command.add("ffmpeg");
+        command.add("-y");
         command.add("-i");
         command.add(videoPath.toString());
-        command.add("-filter_complex");
-        command.add(
-                "[0:v]split=3[v1][v2][v3];[v1]scale=w=1920:h=1080[v1out];[v2]scale=w=1280:h=720[v2out];[v3]scale=w=854:h=480[v3out]");
+        command.add("-vf");
+        command.add(String.format("scale=%d:%d", width, height));
 
-        command.addAll(Arrays.asList(
-                "-map", "[v1out]",
-                "-c:v:0", "libx264",
-                "-b:v:0", "5000k",
-                "-maxrate:v:0", "7500k",
-                "-bufsize:v:0", "10000k",
-                "-profile:v:0", "high",
-                "-preset:v:0", "medium",
-                "-bf:v:0", "3",
-                "-g:v:0", "60",
-                "-sc_threshold:v:0", "40",
-                "-r:v:0", "60"));
-        
-        command.addAll(Arrays.asList(
-                "-map", "[v2out]",
-                "-c:v:1", "libx264",
-                "-b:v:1", "2800k",
-                "-maxrate:v:1", "4200k",
-                "-bufsize:v:1", "5600k",
-                "-profile:v:1", "main",
-                "-preset:v:1", "medium",
-                "-bf:v:1", "3",
-                "-g:v:1", "60",
-                "-sc_threshold:v:1", "40",
-                "-r:v:1", "60"));
-        
-        command.addAll(Arrays.asList(
-                "-map", "[v3out]",
-                "-c:v:2", "libx264",
-                "-b:v:2", "1400k",
-                "-maxrate:v:2", "2100k",
-                "-bufsize:v:2", "2800k",
-                "-profile:v:2", "main",
-                "-preset:v:2", "medium",
-                "-bf:v:2", "3",
-                "-g:v:2", "30",
-                "-sc_threshold:v:2", "40",
-                "-r:v:2", "30"));
+        command.add("-c:v");
+        command.add("libx264");
+        command.add("-b:v");
+        command.add(bitrate);
+        command.add("-maxrate");
+        command.add(maxrate);
+        command.add("-bufsize");
+        command.add(bufsize);
+        command.add("-preset");
+        command.add("fast");
+        command.add("-r");
+        command.add(framerate);
+        command.add("-g");
+        command.add(framerate);
 
-        if (hasAudio) {
-            command.addAll(Arrays.asList(
-                "-map", "a:0",
-                "-c:a:0", "aac",
-                "-b:a:0", "192k",
-                "-ac:a:0", "2",
-                "-ar:a:0", "48000"));
-    
-            command.addAll(Arrays.asList(
-                    "-map", "a:0",
-                    "-c:a:1", "aac",
-                    "-b:a:1", "128k",
-                    "-ac:a:1", "2",
-                    "-ar:a:1", "48000"));
-            
-            command.addAll(Arrays.asList(
-                    "-map", "a:0",
-                    "-c:a:2", "aac",
-                    "-b:a:2", "96k",
-                    "-ac:a:2", "2",
-                    "-ar:a:2", "44100"));
+        if (audioBitrate != null) {
+            command.add("-map");
+            command.add("0:v:0");
+            command.add("-map");
+            command.add("0:a:0");
+            command.add("-c:a");
+            command.add("aac");
+            command.add("-b:a");
+            command.add(audioBitrate);
+            command.add("-ac");
+            command.add("2");
+            command.add("-ar");
+            command.add("48000");
         }
 
-        command.addAll(Arrays.asList(
-                "-f", "hls",
-                "-hls_time", "10",
-                "-hls_playlist_type", "vod",
-                "-hls_flags", "independent_segments",
-                "-hls_segment_type", "mpegts",
-                "-hls_segment_filename", outputDir.toString() + "/stream_%v/segment%03d.ts",
-                "-master_pl_name", "master.m3u8"));
+        command.add("-f");
+        command.add("hls");
+        command.add("-hls_time");
+        command.add("10");
+        command.add("-hls_list_size");
+        command.add("0");
+        command.add("-hls_segment_filename");
+        command.add(outputDir.resolve("stream_" + index).resolve("segment%03d.ts").toString());
+        command.add(outputDir.resolve("stream_" + index).resolve("playlist.m3u8").toString());
 
-        if (hasAudio)
-            command.addAll(Arrays.asList("-var_stream_map", "v:0,a:0 v:1,a:1 v:2,a:2"));
-        else
-            command.addAll(Arrays.asList("-var_stream_map", "v:0 v:1 v:2"));
+        System.out.println("Variant " + index + " command: " + String.join(" ", command));
 
-        command.add(outputDir.toString() + "/stream_%v/playlist.m3u8");
+        ProcessBuilder pb = new ProcessBuilder(command);
+        pb.redirectErrorStream(true);
 
-        ProcessBuilder pb = new ProcessBuilder(command.toArray(new String[0]));
         Process process = pb.start();
-        
-        int exitCode = process.waitFor();
-        if (exitCode != 0) {
-            throw new RuntimeException("FFmpeg Failed With Exit Code: " + exitCode);
+        Thread reader = null;
+
+        reader = new Thread(() -> {
+            try (BufferedReader br = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+                String line;
+                while ((line = br.readLine()) != null) {
+                    System.out.println("[" + index + "] " + line);
+                }
+            } catch (IOException e) {
+            }
+        });
+        reader.start();
+
+        boolean finished = process.waitFor(15, TimeUnit.MINUTES);
+
+        if (!finished) {
+            System.err.println("FFmpeg variant " + index + " timed out!");
+            return;
         }
+
+        int exitCode = process.exitValue();
+
+        if (exitCode != 0) {
+            throw new RuntimeException("Variant " + index + " failed with exit code: " + exitCode);
+        }
+
+        System.out.println("Variant " + index + " completed successfully");
+
+        if (process != null && process.isAlive()) {
+            process.destroyForcibly();
+        }
+        if (reader != null && reader.isAlive()) {
+            reader.interrupt();
+        }
+    }
+
+    private void createMasterPlaylist(Path outputDir, boolean hasAudio) throws Exception {
+        StringBuilder master = new StringBuilder();
+        master.append("#EXTM3U\n");
+        master.append("#EXT-X-VERSION:3\n\n");
+
+        master.append("#EXT-X-STREAM-INF:BANDWIDTH=5000000,RESOLUTION=1920x1080\n");
+        master.append("stream_0/playlist.m3u8\n\n");
+
+        master.append("#EXT-X-STREAM-INF:BANDWIDTH=2800000,RESOLUTION=1280x720\n");
+        master.append("stream_1/playlist.m3u8\n\n");
+
+        master.append("#EXT-X-STREAM-INF:BANDWIDTH=1400000,RESOLUTION=854x480\n");
+        master.append("stream_2/playlist.m3u8\n");
+
+            Files.writeString(outputDir.resolve("master.m3u8"), master.toString());
     }
 
     private boolean checkIfVideoHasAudio(Path videoPath) throws Exception {

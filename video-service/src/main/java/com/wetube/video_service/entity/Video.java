@@ -108,7 +108,7 @@ public class Video {
     }
 
     public enum VideoStatus {
-        UPLOADING, READY
+        UPLOADING, READY, FAILED
     }
 
     public enum VideoVisibility {

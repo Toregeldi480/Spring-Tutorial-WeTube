@@ -7,11 +7,12 @@ services:
       dockerfile: Dockerfile
     container_name: registry-service
     ports:
-      - "${REGISTRY_PORT:-8761}:8761"
+      - "8761:8761"
     environment:
-      - JAVA_OPTS=-Xmx256m
+      - SPRING_PROFILES_ACTIVE=docker
+      - JAVA_OPTS=-Xmx256m -Xms256m
     healthcheck:
-      test: ["CMD", "wget", "--spider", "--quiet", "http://localhost:${REGISTRY_PORT:-8761}/"]
+      test: ["CMD", "wget", "--spider", "--quiet", "http://localhost:8761/actuator/health"]
       interval: 15s
       timeout: 5s
       retries: 10
@@ -23,16 +24,16 @@ services:
     image: postgres:16-alpine
     container_name: wetube-postgres
     environment:
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: wetube
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin123
     ports:
-      - "${POSTGRES_PORT:-5432}:5432"
+      - "5432:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
       - ./init-scripts:/docker-entrypoint-initdb.d
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB} -p ${POSTGRES_PORT:-5432}"]
+      test: ["CMD-SHELL", "pg_isready -U admin -d wetube"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -44,12 +45,18 @@ services:
     image: confluentinc/cp-zookeeper:7.5.0
     container_name: zookeeper
     environment:
-      ZOOKEEPER_CLIENT_PORT: "${ZOOKEEPER_PORT:-2181}"
-      ZOOKEEPER_TICK_TIME: "2000"
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
     ports:
-      - "${ZOOKEEPER_PORT:-2181}:2181"
+      - "2181:2181"
     volumes:
       - zookeeper-data:/var/lib/zookeeper/data
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "2181"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
     networks:
       - wetube-network
 
@@ -57,14 +64,15 @@ services:
     image: confluentinc/cp-kafka:7.5.0
     container_name: kafka
     depends_on:
-      - zookeeper
+      zookeeper:
+        condition: service_healthy
     ports:
       - "9092:9092"
-      - "${KAFKA_PORT:-9093}:9093"
+      - "9093:9093"
     environment:
       KAFKA_BROKER_ID: "1"
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:${ZOOKEEPER_PORT:-2181}
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:${KAFKA_PORT:-9093},PLAINTEXT_HOST://localhost:9092
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9093,PLAINTEXT_HOST://localhost:9092
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: "1"
@@ -75,7 +83,7 @@ services:
       - kafka-data:/var/lib/kafka/data
     restart: on-failure
     healthcheck:
-      test: ["CMD-SHELL", "kafka-broker-api-versions --bootstrap-server localhost:${KAFKA_HEALTHCHECK_PORT:-9092} > /dev/null 2>&1"]
+      test: ["CMD-SHELL", "kafka-broker-api-versions --bootstrap-server localhost:9092 > /dev/null 2>&1"]
       interval: 10s
       timeout: 10s
       retries: 10
@@ -92,12 +100,9 @@ services:
       registry-service:
         condition: service_healthy
     ports:
-      - "${GATEWAY_PORT:-8080}:8080"
+      - "8080:8080"
     environment:
       - SPRING_PROFILES_ACTIVE=docker
-      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://registry-service:${REGISTRY_PORT:-8761}/eureka
-      - GATEWAY_TOKEN=${GATEWAY_TOKEN}
-      - SECURITY_JWT_SECRET=${SECURITY_JWT_SECRET}
     restart: on-failure
     networks:
       - wetube-network
@@ -113,18 +118,9 @@ services:
       registry-service:
         condition: service_healthy
     ports:
-      - "${USER_SERVICE_PORT:-8081}:8081"
+      - "8081:8081"
     environment:
       - SPRING_PROFILES_ACTIVE=docker
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:${POSTGRES_PORT:-5432}/${POSTGRES_DB}?currentSchema=user_service
-      - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
-      - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
-      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
-      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://registry-service:${REGISTRY_PORT:-8761}/eureka
-      - GATEWAY_TOKEN=${GATEWAY_TOKEN}
-      - SECURITY_JWT_SECRET=${SECURITY_JWT_SECRET}
-      - SECURITY_JWT_EXPIRATION_TIME=${SECURITY_JWT_EXPIRATION_TIME}
-      - SECURITY_JWT_REFRESH_EXPIRATION_TIME=${SECURITY_JWT_REFRESH_EXPIRATION_TIME}
     restart: on-failure
     networks:
       - wetube-network
@@ -142,21 +138,11 @@ services:
       registry-service:
         condition: service_healthy
     ports:
-      - "${VIDEO_SERVICE_PORT:-8082}:8082"
+      - "8082:8082"
     environment:
       - SPRING_PROFILES_ACTIVE=docker
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres::${POSTGRES_PORT:-5432}/${POSTGRES_DB}?currentSchema=video_service
-      - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
-      - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
-      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:${KAFKA_PORT:-9093}
-      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
-      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://registry-service:${REGISTRY_PORT:-8761}/eureka
-      - GATEWAY_TOKEN=${GATEWAY_TOKEN}
-      - SPRING_APPLICATION_ROOT_LOCATION=${VIDEO_STORAGE_PATH}
-      - SPRING_SERVLET_MULTIPART_MAX_FILE_SIZE=${MAX_FILE_SIZE}
-      - SPRING_SERVLET_MULTIPART_MAX_REQUEST_SIZE=${MAX_REQUEST_SIZE}
     volumes:
-      - video-storage:${VIDEO_STORAGE_PATH}
+      - video-storage:/app/videos
     user: root
     restart: on-failure
     networks:
@@ -168,8 +154,10 @@ services:
       dockerfile: Dockerfile
     container_name: transcoding-service
     depends_on:
-      - kafka
-      - registry-service
+      kafka:
+        condition: service_healthy
+      registry-service:
+        condition: service_healthy
     deploy:
       resources:
         limits:
@@ -177,15 +165,11 @@ services:
         reservations:
           memory: 2G
     ports:
-      - "${TRANSCODING_SERVICE_PORT:-8084}:8084"
+      - "8084:8084"
     environment:
       - SPRING_PROFILES_ACTIVE=docker
-      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:${KAFKA_PORT:-9093}
-      - SPRING_KAFKA_CONSUMER_GROUP_ID=${KAFKA_CONSUMER_GROUP_ID}
-      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://registry-service:${REGISTRY_PORT:-8761}/eureka
-      - GATEWAY_TOKEN=${GATEWAY_TOKEN}
     volumes:
-      - video-storage:${VIDEO_STORAGE_PATH}
+      - video-storage:/app/videos
     user: root
     restart: on-failure
     shm_size: '2gb'
