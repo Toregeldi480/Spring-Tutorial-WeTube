@@ -70,7 +70,7 @@ A microservices-based video streaming platform built with Spring Boot, allowing 
 
 ### 1. Clone the repository
 ```bash
-git clone https://github.com/yourusername/wetube.git
+git clone https://github.com/Toregeldi480/wetube.git
 cd wetube
 ```
 ###  2. Build
@@ -90,15 +90,28 @@ docker compose ps # Should return Up or Healthy
 docker compose logs -f
 ```
 
+### 5. Access Database
+```bash
+docker exec -i wetube-postgres -U admin -d wetube
+SELECT * FROM user_service.users;   # access users table
+SELECT * FROM video_service.videos; # access videos table
+```
+
+### 6. Access Video Storage
+```bash
+docker exec transcoding-service ls /app/videos
+```
+
 ## Project Structure
 ```bash
 WeTube/
+├── frontend/                 # Simple Frontend
 ├── gateway-service/          # Spring Cloud Gateway
 ├── user-service/             # User management & auth
 ├── video-service/            # Video upload & storage
 ├── transcoding-service/      # FFmpeg video processing
 ├── registry-service/         # Eureka service discovery
 ├── docker-compose.yml        # Container orchestration
-├── build-all.sh             # Build script
-└── init-scripts/            # Database initialization
+├── build-all.sh              # Build script
+└── init-scripts/             # Database initialization
 ```
