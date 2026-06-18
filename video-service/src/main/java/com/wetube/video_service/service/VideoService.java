@@ -4,6 +4,7 @@ import com.wetube.video_service.dto.TranscodingMessage;
 import com.wetube.video_service.dto.TranscodingResultMessage;
 import com.wetube.video_service.dto.VideoDto;
 import com.wetube.video_service.entity.Video;
+import com.wetube.video_service.exception.ResourceNotReadyException;
 import com.wetube.video_service.repository.VideoRepository;
 import com.wetube.video_service.utils.VideoMapper;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,6 +20,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -38,11 +40,6 @@ public class VideoService {
         this.kafkaTemplate = kafkaTemplate;
     }
 
-    public void searchByKeyword(String keyword) {
-        List<Video> videos = videoRepository.searchByKeyword(keyword);
-        videos.forEach(s -> System.out.println(s.getTitle()));
-    }
-
     @KafkaListener(topics = "video-transcoding-status", groupId = "transcoding-group", containerFactory = "kafkaListenerContainerFactory")
     public void updateStatus(TranscodingResultMessage message) {
         String videoId = message.getVideoId();
@@ -55,15 +52,23 @@ public class VideoService {
         videoRepository.save(video);
     }
 
+    public List<VideoDto> searchByQuery(String query) {
+        List<Video> videos = videoRepository.findByQuery(query);
+        List<VideoDto> videoDtos = new ArrayList<>();
+        videos.forEach(v -> videoDtos.add(videoMapper.toDto(v)));
+        return videoDtos;
+    }
+
+    public VideoDto getVideoMetadata(String videoId) {
+        Video video = videoRepository.findById(UUID.fromString(videoId)).orElseThrow();
+        return videoMapper.toDto(video);
+    }
+
     public Resource getMasterManifest(String videoId) {
         Video video = videoRepository.findById(UUID.fromString(videoId)).orElseThrow();
 
-//        if (video.getVisibility() == Video.VideoVisibility.PRIVATE && video.getUserId() == UUID.fromString(userId)) {
-//            throw new RuntimeException("You Do Not Have Access To This Video");
-//        }
-
         if (video.getStatus() == Video.VideoStatus.UPLOADING) {
-            throw new RuntimeException("Video Is Not Ready");
+            throw new ResourceNotReadyException("Video With ID [" + videoId + "] Is Not Ready");
         }
 
         Path filePath = Paths.get(rootLocation + "/" + videoId + "/master.m3u8");
@@ -80,14 +85,14 @@ public class VideoService {
         return new FileSystemResource(filePath);
     }
 
-    public VideoDto upload(MultipartFile file, String title, String description, UUID userId) throws IOException {
+    public VideoDto upload(MultipartFile file, String title, String description, String userId) throws IOException {
         Path storagePath = Paths.get(rootLocation);
         String originalFilename = file.getOriginalFilename();
 
         Video video = new Video();
         video.setTitle(title);
         video.setDescription(description);
-        video.setUserId(userId);
+        video.setUserId(UUID.fromString(userId));
         video.setOriginalFilename(originalFilename);
         video.setFileSize(file.getSize());
         video = videoRepository.save(video);

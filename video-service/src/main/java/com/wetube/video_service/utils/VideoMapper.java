@@ -9,11 +9,14 @@ public class VideoMapper {
     public VideoDto toDto(Video video) {
         VideoDto dto = new VideoDto();
         dto.setId(video.getId().toString());
+        dto.setUserId(video.getUserId().toString());
         dto.setTitle(video.getTitle());
         dto.setDescription(video.getDescription());
-        dto.setUserId(video.getUserId().toString());
         dto.setOriginalFilename(video.getOriginalFilename());
+        dto.setDuration(video.getDuration());
         dto.setFileSize(video.getFileSize());
+        dto.setLikes(video.getLikes());
+        dto.setVisibility(video.getVisibility().name());
         dto.setStatus(video.getStatus().name());
 
         return dto;

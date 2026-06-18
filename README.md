@@ -70,7 +70,7 @@ A microservices-based video streaming platform built with Spring Boot, allowing 
 
 ### 1. Clone the repository
 ```bash
-git clone https://github.com/Toregeldi480/wetube.git
+git clone https://github.com/Toregeldi480/Spring-Tutorial-WeTube.git
 cd wetube
 ```
 ###  2. Build
@@ -101,6 +101,10 @@ SELECT * FROM video_service.videos; # access videos table
 ```bash
 docker exec transcoding-service ls /app/videos
 ```
+
+## API Endpoints
+`/auth/login`
+`/auth/register`
 
 ## Project Structure
 ```bash

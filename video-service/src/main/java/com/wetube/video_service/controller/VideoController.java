@@ -1,6 +1,7 @@
 package com.wetube.video_service.controller;
 
 import com.wetube.video_service.dto.VideoDto;
+import com.wetube.video_service.service.VideoLikeService;
 import com.wetube.video_service.service.VideoService;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -9,21 +10,29 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.UUID;
+import java.util.List;
 
 @RestController
 @RequestMapping("/video")
 public class VideoController {
     private final VideoService videoService;
+    private final VideoLikeService videoLikeService;
 
-    public VideoController(VideoService streamingService) {
+    public VideoController(VideoService streamingService, VideoLikeService videoLikeService) {
         this.videoService = streamingService;
+        this.videoLikeService = videoLikeService;
     }
 
-    @GetMapping("/search/{keyword}")
-    public ResponseEntity<String> getVideosByKeyword(@PathVariable String keyword) {
-        videoService.searchByKeyword(keyword);
-        return ResponseEntity.ok("ok");
+    @GetMapping("/search")
+    public ResponseEntity<List<VideoDto>> getVideosByQuery(@RequestParam("query") String query) {
+        List<VideoDto> videoDtos = videoService.searchByQuery(query);
+        return ResponseEntity.ok(videoDtos);
+    }
+
+    @GetMapping("/{videoId}/metadata")
+    public ResponseEntity<VideoDto> getVideoMetadata(@PathVariable String videoId) {
+        VideoDto videoDto = videoService.getVideoMetadata(videoId);
+        return ResponseEntity.ok(videoDto);
     }
 
     @GetMapping("/{videoId}/master.m3u8")
@@ -50,12 +59,17 @@ public class VideoController {
                 .body(segmentResource);
     }
 
+    @PostMapping("/like")
+    public ResponseEntity<String> like(@RequestParam("videoId") String videoId, @RequestHeader("X-User-Id") String userId) throws Exception {
+        return ResponseEntity.ok(videoLikeService.like(videoId, userId));
+    }
+
     @PostMapping("/upload")
     public ResponseEntity<VideoDto> upload(@RequestParam("file") MultipartFile file,
-                                                @RequestParam("title") String title,
-                                                @RequestParam(value = "description", required = false) String description,
-                                                @RequestHeader("X-User-Id") String userId) throws IOException {
+            @RequestParam("title") String title,
+            @RequestParam(value = "description", required = false) String description,
+            @RequestHeader("X-User-Id") String userId) throws IOException {
 
-        return ResponseEntity.ok(videoService.upload(file, title, description, UUID.fromString(userId)));
+        return ResponseEntity.ok(videoService.upload(file, title, description, userId));
     }
 }

@@ -2,7 +2,6 @@ package com.wetube.video_service.entity;
 
 import jakarta.persistence.*;
 
-import java.util.List;
 import java.util.UUID;
 
 @Table(name = "videos")
@@ -19,7 +18,7 @@ public class Video {
     @Column(length = 100, nullable = false)
     private String title;
 
-    @Column(length = 5000, nullable = true)
+    @Column(length = 5000)
     private String description;
 
     @Column(nullable = false)
@@ -28,6 +27,11 @@ public class Video {
     private Long duration;
 
     private Long fileSize;
+
+    private Long likes = 0L;
+
+    @Column(columnDefinition = "tsvector", insertable = false, updatable = false)
+    private String tsvectorColumn;
 
     @Enumerated(EnumType.STRING)
     private VideoStatus status = VideoStatus.UPLOADING;
@@ -89,6 +93,14 @@ public class Video {
 
     public void setFileSize(Long fileSize) {
         this.fileSize = fileSize;
+    }
+
+    public Long getLikes() {
+        return likes;
+    }
+
+    public void setLikes(Long likes) {
+        this.likes = likes;
     }
 
     public VideoStatus getStatus() {

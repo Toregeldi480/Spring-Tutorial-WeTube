@@ -72,12 +72,10 @@ public class TranscodingService {
             System.out.println("Starting 480p variant...");
             encodeVariant(videoPath, outputDir, 2, 854, 480, "1400k", "2100k", "2800k", "30", hasAudio ? "96k" : null);
         } catch (Exception e) {
-            updateStatus(videoId, "FAILED");
             throw new RuntimeException(e);
         }
 
         createMasterPlaylist(outputDir, hasAudio);
-        updateStatus(videoId, "READY");
 
         System.out.println("All transcoding finished for video: " + videoId);
     }
@@ -190,7 +188,7 @@ public class TranscodingService {
         master.append("#EXT-X-STREAM-INF:BANDWIDTH=1400000,RESOLUTION=854x480\n");
         master.append("stream_2/playlist.m3u8\n");
 
-            Files.writeString(outputDir.resolve("master.m3u8"), master.toString());
+        Files.writeString(outputDir.resolve("master.m3u8"), master.toString());
     }
 
     private boolean checkIfVideoHasAudio(Path videoPath) throws Exception {

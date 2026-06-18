@@ -1,9 +1,9 @@
-package com.wetube.user_service.entity;
+package com.wetube.video_service.entity;
 
+import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-import org.jspecify.annotations.Nullable;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -12,7 +12,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
-@Table(name = "users")
+@Table(name = "users", schema = "user_service")
 @Entity
 public class User implements UserDetails {
     @Id

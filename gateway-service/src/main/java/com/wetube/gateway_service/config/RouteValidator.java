@@ -15,7 +15,8 @@ public class RouteValidator {
     );
 
     public static final List<String> exceptions = List.of(
-            "/video/upload"
+            "/video/upload",
+            "/video/like"
     );
 
     public Predicate<ServerHttpRequest> isSecured = request ->

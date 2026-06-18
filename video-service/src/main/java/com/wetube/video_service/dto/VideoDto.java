@@ -1,17 +1,16 @@
 package com.wetube.video_service.dto;
 
-import java.util.List;
-
 public class VideoDto {
     private String id;
     private String userId;
     private String title;
     private String description;
     private String originalFilename;
-    private String visibility;
-    private String status;
     private Long duration;
     private Long fileSize;
+    private Long likes;
+    private String visibility;
+    private String status;
 
     public String getId() {
         return id;
@@ -53,6 +52,30 @@ public class VideoDto {
         this.originalFilename = originalFilename;
     }
 
+    public Long getDuration() {
+        return duration;
+    }
+
+    public void setDuration(Long duration) {
+        this.duration = duration;
+    }
+
+    public Long getFileSize() {
+        return fileSize;
+    }
+
+    public Long getLikes() {
+        return likes;
+    }
+
+    public void setLikes(Long likes) {
+        this.likes = likes;
+    }
+
+    public void setFileSize(Long fileSize) {
+        this.fileSize = fileSize;
+    }
+
     public String getStatus() {
         return status;
     }
@@ -67,21 +90,5 @@ public class VideoDto {
 
     public void setVisibility(String visibility) {
         this.visibility = visibility;
-    }
-
-    public Long getDuration() {
-        return duration;
-    }
-
-    public void setDuration(Long duration) {
-        this.duration = duration;
-    }
-
-    public Long getFileSize() {
-        return fileSize;
-    }
-
-    public void setFileSize(Long fileSize) {
-        this.fileSize = fileSize;
     }
 }
