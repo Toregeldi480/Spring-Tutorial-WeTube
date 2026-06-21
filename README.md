@@ -11,7 +11,7 @@ A microservices-based video streaming platform built with Spring Boot, allowing 
 | **API Gateway** | Spring Cloud Gateway |
 | **Database** | PostgreSQL 16 |
 | **Message Broker** | Apache Kafka |
-| **Video Processing** | FFmpeg (libx264, AAC) |
+| **Video Processing** | Jaffree (FFmpeg Wrapper) |
 | **Streaming Protocol** | HTTP Live Streaming (HLS) |
 | **Authentication** | JWT (Access & Refresh Tokens) |
 | **Build Tool** | Maven |
@@ -43,7 +43,6 @@ A microservices-based video streaming platform built with Spring Boot, allowing 
 - Consumes video processing messages from Kafka
 - FFmpeg-based video transcoding
 - Generates adaptive HLS streams (1080p, 720p, 480p)
-- Audio extraction and encoding (AAC)
 - Outputs master M3U8 playlist with multiple quality variants
 
 ### 📋 Registry Service (Default Port: 8761)
