@@ -35,7 +35,7 @@ public class VideoLikeService {
         if (videoLikeRepository.existsByVideoIdAndUserId(videoUUID, userUUID)) {
             video.setLikes(likeCount - 1);
             videoLikeRepository.removeByVideoIdAndUserId(videoUUID, userUUID);
-            return "Remove like from video with ID: " + videoId;
+            return "Removed like from video with ID: " + videoId;
         } else {
             video.setLikes(likeCount + 1);
             videoLikeRepository.save(new VideoLike(videoUUID, userUUID));

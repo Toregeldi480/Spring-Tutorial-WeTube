@@ -8,6 +8,10 @@ import java.util.UUID;
 @Entity
 @IdClass(VideoLikeId.class)
 public class VideoLike {
+    public VideoLike() {
+
+    }
+
     public VideoLike(UUID videoId, UUID userId) {
         this.videoId = videoId;
         this.userId = userId;

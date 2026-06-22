@@ -27,7 +27,7 @@ CREATE TRIGGER tsvector_update BEFORE INSERT OR UPDATE
 
 
 
-CREATE TABLE video_service.video_likes (
+CREATE TABLE IF NOT EXISTS video_service.video_likes(
     video_id UUID NOT NULL,
     user_id UUID NOT NULL,
     PRIMARY KEY (video_id, user_id),
