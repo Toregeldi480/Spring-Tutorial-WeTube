@@ -22,7 +22,7 @@ services:
 
   postgres:
     image: postgres:16-alpine
-    container_name: wetube-postgres
+    container_name: postgres
     environment:
       POSTGRES_DB: wetube
       POSTGRES_USER: admin
