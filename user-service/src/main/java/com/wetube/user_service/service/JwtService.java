@@ -10,6 +10,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.security.Key;
+import java.time.Duration;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -19,8 +20,7 @@ public class JwtService {
     @Value("${security.jwt.secret}")
     private String secretKey;
 
-    @Value("${security.jwt.expiration-time}")
-    private long jwtExpiration;
+    private long jwtExpiration = Duration.ofMinutes(30).toMillis();
 
     private final UserRepository userRepository;
 

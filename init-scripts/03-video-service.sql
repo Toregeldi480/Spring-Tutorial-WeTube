@@ -7,11 +7,12 @@ CREATE TABLE IF NOT EXISTS video_service.videos(
   duration BIGINT,
   file_size BIGINT,
   likes BIGINT NOT NULL DEFAULT 0,
+  dislikes BIGINT NOT NULL DEFAULT 0,
   tsvector_column TSVECTOR,
   status VARCHAR(20) NOT NULL DEFAULT 'UPLOADING',
   visibility VARCHAR(20) NOT NULL DEFAULT 'PUBLIC',
-  CONSTRAINT chk_video_status CHECK (status IN ('UPLOADING', 'READY', 'FAILED')),
-  CONSTRAINT chk_video_visibility CHECK (visibility IN ('PUBLIC', 'PRIVATE'))
+  CONSTRAINT check_video_status CHECK (status IN ('UPLOADING', 'READY', 'FAILED')),
+  CONSTRAINT check_video_visibility CHECK (visibility IN ('PUBLIC', 'PRIVATE'))
 );
 
 CREATE OR REPLACE FUNCTION video_service.update_tsvector_column() RETURNS TRIGGER AS $$
@@ -27,13 +28,14 @@ CREATE TRIGGER tsvector_update BEFORE INSERT OR UPDATE
 
 
 
-CREATE TABLE IF NOT EXISTS video_service.video_likes(
+CREATE TABLE IF NOT EXISTS video_service.video_ratings(
     video_id UUID NOT NULL,
     user_id UUID NOT NULL,
+    is_liked BOOLEAN,
     PRIMARY KEY (video_id, user_id),
     FOREIGN KEY (video_id) REFERENCES video_service.videos(id) ON DELETE CASCADE,
     FOREIGN KEY (user_id) REFERENCES user_service.users(id) ON DELETE CASCADE
 );
 
-CREATE INDEX idx_video_likes_video_id ON video_service.video_likes(video_id);
-CREATE INDEX idx_video_likes_user_id ON video_service.video_likes(user_id);
+CREATE INDEX idx_video_ratings_video_id ON video_service.video_ratings(video_id);
+CREATE INDEX idx_video_ratings_user_id ON video_service.video_ratings(user_id);

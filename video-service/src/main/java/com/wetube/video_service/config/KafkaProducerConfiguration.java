@@ -1,6 +1,6 @@
 package com.wetube.video_service.config;
 
-import com.wetube.video_service.dto.TranscodingMessage;
+import com.wetube.video_service.dto.TranscodingRequestMessage;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,7 +20,7 @@ public class KafkaProducerConfiguration {
     private String bootstrapAddress;
 
     @Bean
-    public ProducerFactory<String, TranscodingMessage> producerFactory() {
+    public ProducerFactory<String, TranscodingRequestMessage> producerFactory() {
         Map<String, Object> configProps = new HashMap<>();
         configProps.put(
                 ProducerConfig.BOOTSTRAP_SERVERS_CONFIG,
@@ -35,7 +35,7 @@ public class KafkaProducerConfiguration {
     }
 
     @Bean
-    public KafkaTemplate<String, TranscodingMessage> kafkaTemplate() {
+    public KafkaTemplate<String, TranscodingRequestMessage> kafkaTemplate() {
         return new KafkaTemplate<>(producerFactory());
     }
 }

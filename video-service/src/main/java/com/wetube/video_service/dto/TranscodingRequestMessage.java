@@ -1,6 +1,6 @@
-package com.wetube.transcoding_service.dto;
+package com.wetube.video_service.dto;
 
-public class TranscodingMessage {
+public class TranscodingRequestMessage {
     private String videoId;
     private String originalFilePath;
     private String outputDirectory;

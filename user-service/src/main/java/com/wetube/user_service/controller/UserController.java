@@ -14,14 +14,18 @@ public class UserController {
         this.userService = userService;
     }
 
+    @GetMapping("/@{username}")
+    public ResponseEntity<UserDto> getUserByUsername(@PathVariable String username) {
+        return ResponseEntity.ok(userService.getUserByUsername(username));
+    }
+
     @GetMapping("/me")
-    public ResponseEntity<UserDto> me(@RequestHeader(value = "X-Username") String username) {
-        System.out.println(username);
-        return ResponseEntity.ok().body(userService.me(username));
+    public ResponseEntity<UserDto> getUserSelf(@RequestHeader("X-Username") String username) {
+        return ResponseEntity.ok(userService.getUserByUsername(username));
     }
 
     @GetMapping("/all")
-    public ResponseEntity<Iterable<UserDto>> all() {
-        return ResponseEntity.ok().body(userService.all());
+    public ResponseEntity<Iterable<UserDto>> getAllUsers() {
+        return ResponseEntity.ok(userService.all());
     }
 }

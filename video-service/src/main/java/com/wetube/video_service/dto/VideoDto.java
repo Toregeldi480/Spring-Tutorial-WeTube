@@ -9,6 +9,7 @@ public class VideoDto {
     private Long duration;
     private Long fileSize;
     private Long likes;
+    private Long dislikes;
     private String visibility;
     private String status;
 
@@ -70,6 +71,14 @@ public class VideoDto {
 
     public void setLikes(Long likes) {
         this.likes = likes;
+    }
+
+    public Long getDislikes() {
+        return dislikes;
+    }
+
+    public void setDislikes(Long dislikes) {
+        this.dislikes = dislikes;
     }
 
     public void setFileSize(Long fileSize) {

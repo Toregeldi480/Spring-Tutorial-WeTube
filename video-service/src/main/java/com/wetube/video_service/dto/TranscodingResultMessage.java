@@ -2,7 +2,8 @@ package com.wetube.video_service.dto;
 
 public class TranscodingResultMessage {
     private String videoId;
-    private String result;
+    private String status;
+    private Long duration;
 
     public String getVideoId() {
         return videoId;
@@ -12,11 +13,19 @@ public class TranscodingResultMessage {
         this.videoId = videoId;
     }
 
-    public String getResult() {
-        return result;
+    public String getStatus() {
+        return status;
     }
 
-    public void setResult(String result) {
-        this.result = result;
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public Long getDuration() {
+        return duration;
+    }
+
+    public void setDuration(Long duration) {
+        this.duration = duration;
     }
 }

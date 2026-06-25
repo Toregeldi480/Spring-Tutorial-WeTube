@@ -16,6 +16,7 @@ public class VideoMapper {
         dto.setDuration(video.getDuration());
         dto.setFileSize(video.getFileSize());
         dto.setLikes(video.getLikes());
+        dto.setDislikes(video.getDislikes());
         dto.setVisibility(video.getVisibility().name());
         dto.setStatus(video.getStatus().name());
 

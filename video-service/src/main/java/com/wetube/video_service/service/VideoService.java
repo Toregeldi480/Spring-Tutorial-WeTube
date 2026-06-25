@@ -1,6 +1,6 @@
 package com.wetube.video_service.service;
 
-import com.wetube.video_service.dto.TranscodingMessage;
+import com.wetube.video_service.dto.TranscodingRequestMessage;
 import com.wetube.video_service.dto.TranscodingResultMessage;
 import com.wetube.video_service.dto.VideoDto;
 import com.wetube.video_service.entity.Video;
@@ -31,24 +31,26 @@ public class VideoService {
 
     private final VideoMapper videoMapper;
     private final VideoRepository videoRepository;
-    private final KafkaTemplate<String, TranscodingMessage> kafkaTemplate;
+    private final KafkaTemplate<String, TranscodingRequestMessage> kafkaTemplate;
 
     public VideoService(VideoMapper videoMapper, VideoRepository videoRepository,
-            KafkaTemplate<String, TranscodingMessage> kafkaTemplate) {
+            KafkaTemplate<String, TranscodingRequestMessage> kafkaTemplate) {
         this.videoMapper = videoMapper;
         this.videoRepository = videoRepository;
         this.kafkaTemplate = kafkaTemplate;
     }
 
-    @KafkaListener(topics = "video-transcoding-status", groupId = "transcoding-group", containerFactory = "kafkaListenerContainerFactory")
-    public void updateStatus(TranscodingResultMessage message) {
+    @KafkaListener(topics = "video-transcoding-result", groupId = "transcoding-group", containerFactory = "kafkaListenerContainerFactory")
+    public void updateVideoTranscodingResult(TranscodingResultMessage message) {
         String videoId = message.getVideoId();
-        String result = message.getResult();
+        String status = message.getStatus();
+        Long duration = message.getDuration();
 
-        System.out.println("Message Received: " + videoId + " " + result);
+        System.out.println("Message Received: " + videoId + " " + status + " " + duration);
 
         Video video = videoRepository.findById(UUID.fromString(videoId)).orElseThrow();
-        video.setStatus(Video.VideoStatus.valueOf(result));
+        video.setStatus(Video.VideoStatus.valueOf(status));
+        video.setDuration(duration);
         videoRepository.save(video);
     }
 
@@ -106,13 +108,13 @@ public class VideoService {
         Files.copy(file.getInputStream(), originalFilePath,
                 StandardCopyOption.REPLACE_EXISTING);
 
-        TranscodingMessage message = new TranscodingMessage();
+        TranscodingRequestMessage message = new TranscodingRequestMessage();
         message.setVideoId(videoId);
         message.setOriginalFilePath(originalFilePath.toString());
         message.setOutputDirectory(videoDir.toString());
 
         System.out.println("Message Sent: " + message.getVideoId());
-        kafkaTemplate.send("video-transcoding", message);
+        kafkaTemplate.send("video-transcoding-request", message);
 
         return videoMapper.toDto(video);
     }

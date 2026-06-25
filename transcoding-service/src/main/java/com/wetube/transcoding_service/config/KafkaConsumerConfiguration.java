@@ -1,6 +1,6 @@
 package com.wetube.transcoding_service.config;
 
-import com.wetube.transcoding_service.dto.TranscodingMessage;
+import com.wetube.transcoding_service.dto.TranscodingRequestMessage;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,7 +28,7 @@ public class KafkaConsumerConfiguration {
     private String groupId;
 
     @Bean
-    public ConsumerFactory<String, TranscodingMessage> consumerFactory() {
+    public ConsumerFactory<String, TranscodingRequestMessage> consumerFactory() {
         Map<String, Object> props = new HashMap<>();
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapAddress);
         props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
@@ -37,15 +37,15 @@ public class KafkaConsumerConfiguration {
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 
         props.put(JacksonJsonDeserializer.TRUSTED_PACKAGES, "com.wetube.transcoding_service.dto");
-        props.put(JacksonJsonDeserializer.TYPE_MAPPINGS, "transcodingMessage:com.wetube.transcoding_service.dto.TranscodingMessage");
+        props.put(JacksonJsonDeserializer.TYPE_MAPPINGS, "transcodingRequestMessage:com.wetube.transcoding_service.dto.TranscodingRequestMessage");
         props.put(JacksonJsonDeserializer.USE_TYPE_INFO_HEADERS, false);
-        props.put(JacksonJsonDeserializer.VALUE_DEFAULT_TYPE, "com.wetube.transcoding_service.dto.TranscodingMessage");
+        props.put(JacksonJsonDeserializer.VALUE_DEFAULT_TYPE, "com.wetube.transcoding_service.dto.TranscodingRequestMessage");
         return new DefaultKafkaConsumerFactory<>(props);
     }
 
     @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, TranscodingMessage> kafkaListenerContainerFactory() {
-        ConcurrentKafkaListenerContainerFactory<String, TranscodingMessage> factory = new ConcurrentKafkaListenerContainerFactory<>();
+    public ConcurrentKafkaListenerContainerFactory<String, TranscodingRequestMessage> kafkaListenerContainerFactory() {
+        ConcurrentKafkaListenerContainerFactory<String, TranscodingRequestMessage> factory = new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(consumerFactory());
         factory.setRecordMessageConverter(messageConverter());
         return factory;

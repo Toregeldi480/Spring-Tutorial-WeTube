@@ -24,6 +24,6 @@ public class KafkaTopicConfiguration {
 
     @Bean
     public NewTopic videoTranscodingRequest() {
-        return new NewTopic("video-transcoding", 3, (short) 1);
+        return new NewTopic("video-transcoding-request", 3, (short) 1);
     }
 }

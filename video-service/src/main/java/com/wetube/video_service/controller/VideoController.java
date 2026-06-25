@@ -1,7 +1,7 @@
 package com.wetube.video_service.controller;
 
 import com.wetube.video_service.dto.VideoDto;
-import com.wetube.video_service.service.VideoLikeService;
+import com.wetube.video_service.service.VideoRatingService;
 import com.wetube.video_service.service.VideoService;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -11,16 +11,17 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/video")
 public class VideoController {
     private final VideoService videoService;
-    private final VideoLikeService videoLikeService;
+    private final VideoRatingService videoRatingService;
 
-    public VideoController(VideoService streamingService, VideoLikeService videoLikeService) {
+    public VideoController(VideoService streamingService, VideoRatingService videoRatingService) {
         this.videoService = streamingService;
-        this.videoLikeService = videoLikeService;
+        this.videoRatingService = videoRatingService;
     }
 
     @GetMapping("/search")
@@ -59,9 +60,24 @@ public class VideoController {
                 .body(segmentResource);
     }
 
+    @GetMapping("/likes")
+    public List<VideoDto> getUserLikedVideos(@RequestParam("userId") String userId) {
+        return videoRatingService.getUserLikedVideos(UUID.fromString(userId));
+    }
+
+    @GetMapping("/dislikes")
+    public List<VideoDto> getUserDislikedVideos(@RequestParam("userId") String userId) {
+        return videoRatingService.getUserDislikedVideos(UUID.fromString(userId));
+    }
+
     @PostMapping("/like")
     public ResponseEntity<String> like(@RequestParam("videoId") String videoId, @RequestHeader("X-User-Id") String userId) throws Exception {
-        return ResponseEntity.ok(videoLikeService.like(videoId, userId));
+        return ResponseEntity.ok(videoRatingService.like(videoId, userId));
+    }
+
+    @PostMapping("/dislike")
+    public ResponseEntity<String> dislike(@RequestParam("videoId") String videoId, @RequestHeader("X-User-Id") String userId) throws Exception {
+        return ResponseEntity.ok(videoRatingService.dislike(videoId, userId));
     }
 
     @PostMapping("/upload")

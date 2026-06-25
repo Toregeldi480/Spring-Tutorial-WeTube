@@ -28,14 +28,14 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<User> register(@RequestBody AuthDto authDto) {
-        return ResponseEntity.ok().body(authService.register(authDto));
+        return ResponseEntity.ok(authService.register(authDto));
     }
 
     @PostMapping("/login")
     public ResponseEntity<UserDto> login(@RequestBody AuthDto authDto) {
         User user = authService.login(authDto);
         String jwtToken = jwtService.generateToken(user);
-        AuthService.TokenCookies cookies = new AuthService.TokenCookies(jwtToken, Duration.ofMinutes(15), Duration.ofDays(7));
+        AuthService.TokenCookies cookies = new AuthService.TokenCookies(jwtToken, Duration.ofMinutes(30), Duration.ofDays(7));
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, cookies.getAccessToken().toString())

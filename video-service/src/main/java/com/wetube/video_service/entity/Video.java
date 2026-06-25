@@ -30,6 +30,8 @@ public class Video {
 
     private Long likes = 0L;
 
+    private Long dislikes = 0L;
+
     @Column(columnDefinition = "tsvector", insertable = false, updatable = false)
     private String tsvectorColumn;
 
@@ -101,6 +103,14 @@ public class Video {
 
     public void setLikes(Long likes) {
         this.likes = likes;
+    }
+
+    public Long getDislikes() {
+        return dislikes;
+    }
+
+    public void setDislikes(Long dislikes) {
+        this.dislikes = dislikes;
     }
 
     public VideoStatus getStatus() {

@@ -3,8 +3,8 @@ CREATE TABLE IF NOT EXISTS user_service.users(
   email VARCHAR(100),
   username VARCHAR(50) NOT NULL,
   password VARCHAR(255),
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT now()
+  CONSTRAINT check_username CHECK (username ~ '^[A-Za-z0-9._-]+$'),
+  CONSTRAINT check_email CHECK (email ~ '^[A-Za-z0-9._%-]+@[A-Za-z0-9.-]+[.][A-Za-z]+$')
 );
 
 CREATE OR REPLACE FUNCTION update_modified_column() RETURNS TRIGGER AS $$

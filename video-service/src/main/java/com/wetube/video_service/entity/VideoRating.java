@@ -4,17 +4,18 @@ import jakarta.persistence.*;
 
 import java.util.UUID;
 
-@Table(name = "video_likes")
+@Table(name = "video_ratings")
 @Entity
-@IdClass(VideoLikeId.class)
-public class VideoLike {
-    public VideoLike() {
+@IdClass(VideoRatingId.class)
+public class VideoRating {
+    public VideoRating() {
 
     }
 
-    public VideoLike(UUID videoId, UUID userId) {
+    public VideoRating(UUID videoId, UUID userId, Boolean isLiked) {
         this.videoId = videoId;
         this.userId = userId;
+        this.isLiked = isLiked;
     }
 
     @Id
@@ -24,6 +25,9 @@ public class VideoLike {
     @Id
     @Column(name = "user_id")
     private UUID userId;
+
+    @Column(name = "is_liked")
+    private Boolean isLiked;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "video_id", insertable = false, updatable = false)
@@ -49,6 +53,14 @@ public class VideoLike {
         this.userId = userId;
     }
 
+    public Boolean getIsLiked() {
+        return this.isLiked;
+    }
+
+    public void setIsLiked(Boolean isLiked) {
+        this.isLiked = isLiked;
+    }
+
     public Video getVideo() {
         return video;
     }
@@ -65,4 +77,3 @@ public class VideoLike {
         this.user = user;
     }
 }
-

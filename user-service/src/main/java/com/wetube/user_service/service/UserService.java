@@ -15,7 +15,7 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-    public UserDto me(String username) {
+    public UserDto getUserByUsername(String username) {
         User user = userRepository.findByUsername(username).orElseThrow();
         return new UserDto(user.getUsername(), user.getEmail());
     }

@@ -32,7 +32,6 @@ eureka:
 security:
   jwt:
     secret: a111396840caddbdd1b160c64045ebb68baf11ba0cf4996e8526ceb3c67d570b
-    expiration-time: 900000
 
 gateway:
   token: mBuIFTo+SjyJOXeNN75zeGIUD6InWfcgwoRp2llZXgs=
