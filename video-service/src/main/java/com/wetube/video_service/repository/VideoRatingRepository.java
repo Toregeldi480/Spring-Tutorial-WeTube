@@ -16,7 +16,21 @@ import java.util.UUID;
 public interface VideoRatingRepository extends JpaRepository<VideoRating, VideoRatingId> {
     @Modifying
     @Query(value = "DELETE FROM video_service.video_ratings vr WHERE vr.video_id = :videoId AND vr.user_id = :userId", nativeQuery = true)
-    void removeByVideoIdAndUserId(@Param("videoId") UUID videoId, @Param("userId") UUID userId);
+    void deleteByVideoIdAndUserId(@Param("videoId") UUID videoId, @Param("userId") UUID userId);
+
+    @Query(value = "SELECT vr.video_id, vr.user_id, vr.is_liked " +
+            "FROM video_service.video_ratings vr " +
+            "WHERE vr.video_id = :videoId " +
+            "AND vr.is_liked = true",
+            nativeQuery = true)
+    List<VideoRating> findLikesByVideoId(@Param("videoId") UUID videoId);
+
+    @Query(value = "SELECT vr.video_id, vr.user_id, vr_is_liked " +
+            "FROM video_service.video_ratings vr " +
+            "WHERE vr.video_id = :videoId " +
+            "AND vr.is_liked = false",
+            nativeQuery = true)
+    List<VideoRating> findDislikesByVideoId(@Param("videoId") UUID videoId);
 
     @Query(value = "SELECT vr.video_id, vr.user_id, vr.is_liked " +
             "FROM video_service.video_ratings vr " +

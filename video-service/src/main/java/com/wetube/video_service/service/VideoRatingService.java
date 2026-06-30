@@ -1,11 +1,14 @@
 package com.wetube.video_service.service;
 
+import com.wetube.video_service.dto.UserDto;
 import com.wetube.video_service.dto.VideoDto;
+import com.wetube.video_service.entity.User;
 import com.wetube.video_service.entity.Video;
 import com.wetube.video_service.entity.VideoRating;
 import com.wetube.video_service.repository.VideoRatingRepository;
 import com.wetube.video_service.repository.VideoRepository;
-import com.wetube.video_service.utils.VideoMapper;
+import com.wetube.video_service.util.UserMapper;
+import com.wetube.video_service.util.VideoMapper;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -17,11 +20,13 @@ import java.util.stream.Collectors;
 @Service
 @Transactional
 public class VideoRatingService {
+    private final UserMapper userMapper;
     private final VideoMapper videoMapper;
     private final VideoRepository videoRepository;
     private final VideoRatingRepository videoRatingRepository;
 
-    public VideoRatingService(VideoMapper videoMapper, VideoRepository videoRepository, VideoRatingRepository videoRatingRepository) {
+    public VideoRatingService(UserMapper userMapper, VideoMapper videoMapper, VideoRepository videoRepository, VideoRatingRepository videoRatingRepository) {
+        this.userMapper = userMapper;
         this.videoMapper = videoMapper;
         this.videoRepository = videoRepository;
         this.videoRatingRepository = videoRatingRepository;
@@ -33,24 +38,23 @@ public class VideoRatingService {
         Video video = videoRepository.findById(videoUUID).orElseThrow();
         Long likes = video.getLikes();
         Long dislikes = video.getDislikes();
-
         Optional<VideoRating> videoRating = videoRatingRepository.findByVideoIdAndUserId(videoUUID, userUUID);
 
         if (videoRating.isEmpty()) {
             video.setLikes(likes + 1);
             videoRatingRepository.save(new VideoRating(videoUUID, userUUID, true));
-            return "Liked video with ID: " + videoId;
+            return "Liked Video With ID: " + videoId;
         }
 
         if (videoRating.get().getIsLiked()) {
             video.setLikes(likes - 1);
-            videoRatingRepository.removeByVideoIdAndUserId(videoUUID, userUUID);
-            return "Removed like from video with ID: " + videoId;
+            videoRatingRepository.deleteByVideoIdAndUserId(videoUUID, userUUID);
+            return "Removed Like From Video With ID: " + videoId;
         } else {
             video.setDislikes(dislikes - 1);
             video.setLikes(likes + 1);
             videoRatingRepository.save(new VideoRating(videoUUID, userUUID, true));
-            return "Removed dislike and liked video with ID: " + videoId;
+            return "Removed Dislike And Liked Video With ID: " + videoId;
         }
     }
 
@@ -60,42 +64,55 @@ public class VideoRatingService {
         Video video = videoRepository.findById(videoUUID).orElseThrow();
         Long likes = video.getLikes();
         Long dislikes = video.getDislikes();
-
         Optional<VideoRating> videoRating = videoRatingRepository.findByVideoIdAndUserId(videoUUID, userUUID);
 
         if (videoRating.isEmpty()) {
             video.setDislikes(dislikes + 1);
             videoRatingRepository.save(new VideoRating(videoUUID, userUUID, false));
-            return "Disliked video with ID: " + videoId;
+            return "Disliked Video With ID: " + videoId;
         }
 
         if (!videoRating.get().getIsLiked()) {
             video.setDislikes(dislikes - 1);
-            videoRatingRepository.removeByVideoIdAndUserId(videoUUID, userUUID);
-            return "Removed dislike from video with ID: " + videoId;
+            videoRatingRepository.deleteByVideoIdAndUserId(videoUUID, userUUID);
+            return "Removed Dislike From Video With ID: " + videoId;
         } else {
             video.setDislikes(dislikes + 1);
             video.setLikes(likes - 1);
             videoRatingRepository.save(new VideoRating(videoUUID, userUUID, false));
-            return "Removed like and disliked video with ID: " + videoId;
+            return "Removed Like And Disliked Video With ID: " + videoId;
         }
+    }
+
+    public List<UserDto> getVideoLikedUsers(UUID videoId) {
+        List<VideoRating> likedUsers = videoRatingRepository.findLikesByVideoId(videoId);
+
+        return likedUsers.stream().map(user ->
+                userMapper.toDto(user.getUser())
+        ).collect(Collectors.toList());
+    }
+
+    public List<UserDto> getVideoDislikedUsers(UUID videoId) {
+        List<VideoRating> likedUsers = videoRatingRepository.findDislikesByVideoId(videoId);
+
+        return likedUsers.stream().map(user ->
+                userMapper.toDto(user.getUser())
+        ).collect(Collectors.toList());
     }
 
     public List<VideoDto> getUserLikedVideos(UUID userId) {
         List<VideoRating> likedVideos = videoRatingRepository.findLikesByUserId(userId);
 
-        return likedVideos.stream().map(likedVideo -> {
-            Video video = likedVideo.getVideo();
-            return videoMapper.toDto(video);
-        }).collect(Collectors.toList());
+        return likedVideos.stream().map(video ->
+            videoMapper.toDto(video.getVideo())
+        ).collect(Collectors.toList());
     }
 
     public List<VideoDto> getUserDislikedVideos(UUID userId) {
         List<VideoRating> likedVideos = videoRatingRepository.findDislikesByUserId(userId);
 
-        return likedVideos.stream().map(likedVideo -> {
-            Video video = likedVideo.getVideo();
-            return videoMapper.toDto(video);
-        }).collect(Collectors.toList());
+        return likedVideos.stream().map(video ->
+                videoMapper.toDto(video.getVideo())
+        ).collect(Collectors.toList());
     }
 }

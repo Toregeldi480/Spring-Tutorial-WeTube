@@ -20,7 +20,8 @@ public class AuthService {
 
     private final PasswordEncoder passwordEncoder;
 
-    public AuthService(UserRepository userRepository, AuthenticationManager authenticationManager, PasswordEncoder passwordEncoder) {
+    public AuthService(UserRepository userRepository, AuthenticationManager authenticationManager,
+            PasswordEncoder passwordEncoder) {
         this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
@@ -36,7 +37,8 @@ public class AuthService {
             user = userRepository.findByUsername(username).orElseThrow();
         }
 
-        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(user.getUsername(), authDto.getPassword()));
+        authenticationManager
+                .authenticate(new UsernamePasswordAuthenticationToken(user.getUsername(), authDto.getPassword()));
 
         return user;
     }
@@ -81,6 +83,7 @@ public class AuthService {
                     .sameSite("Lax")
                     .build();
         }
+
         public ResponseCookie getRefreshToken() {
             return ResponseCookie.from("refreshToken", jwtToken)
                     .httpOnly(true)

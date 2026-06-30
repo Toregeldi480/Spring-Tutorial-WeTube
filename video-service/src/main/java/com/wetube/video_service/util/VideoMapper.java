@@ -1,4 +1,4 @@
-package com.wetube.video_service.utils;
+package com.wetube.video_service.util;
 
 import com.wetube.video_service.dto.VideoDto;
 import com.wetube.video_service.entity.Video;

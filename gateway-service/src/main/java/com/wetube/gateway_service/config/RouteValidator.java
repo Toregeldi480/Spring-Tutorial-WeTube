@@ -8,18 +8,21 @@ import java.util.function.Predicate;
 
 @Component
 public class RouteValidator {
-        public static final List<String> openApiEndpoints = List.of(
+        public static final List<String> PUBLIC_ENDPOINTS = List.of(
+                        "/user/",
                         "/video/",
                         "/auth/",
                         "/eureka/");
 
-        public static final List<String> securedApiEndpoints = List.of(
+        public static final List<String> PRIVATE_ENDPOINTS = List.of(
                         "/video/upload",
-                        "/video/like",
-                        "/video/dislike");
+                        "/video-rating/video/like",
+                        "/video-rating/video/dislike",
+                        "/user/subscribe",
+                        "/user/unsubscribe",
+                        "/user/me");
 
-        public Predicate<ServerHttpRequest> isSecured = request -> openApiEndpoints.stream()
+        public Predicate<ServerHttpRequest> isSecured = request -> PUBLIC_ENDPOINTS.stream()
                         .noneMatch(uri -> request.getURI().getPath().startsWith(uri)) ||
-                        securedApiEndpoints.stream()
-                                        .anyMatch(uri -> request.getURI().getPath().startsWith(uri));
+                        PRIVATE_ENDPOINTS.stream().anyMatch(uri -> request.getURI().getPath().startsWith(uri));
 }

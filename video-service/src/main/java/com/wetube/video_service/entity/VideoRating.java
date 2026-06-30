@@ -8,9 +8,7 @@ import java.util.UUID;
 @Entity
 @IdClass(VideoRatingId.class)
 public class VideoRating {
-    public VideoRating() {
-
-    }
+    public VideoRating() {}
 
     public VideoRating(UUID videoId, UUID userId, Boolean isLiked) {
         this.videoId = videoId;

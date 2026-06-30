@@ -43,7 +43,7 @@ public class AuthFilter extends AbstractGatewayFilterFactory<AuthFilter.Config> 
                 String token = extractTokenFromCookie(request);
 
                 if (token == null) {
-                    System.out.println("Token Not Found");
+                    System.out.println("Token: Not Found");
                     return handleUnauthorized(exchange, "Missing Authentication Token");
                 }
                 System.out.println("Token: " + token);

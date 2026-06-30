@@ -1,9 +1,9 @@
 package com.wetube.video_service.entity;
 
-import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.jspecify.annotations.Nullable;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -29,28 +29,24 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private String password;
 
-    @CreationTimestamp
-    @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt;
+    private Long subscribers;
 
-    @UpdateTimestamp
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
-
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of();
+    public UUID getId() {
+        return id;
     }
 
-    @Override
-    public boolean isAccountNonExpired() {
-        return true;
+    public void setId(UUID id) {
+        this.id = id;
     }
 
-    @Override
-    public boolean isAccountNonLocked() {
-        return true;
+    public String getEmail() {
+        return email;
     }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
 
     @Override
     public String getUsername() {
@@ -70,35 +66,28 @@ public class User implements UserDetails {
         this.password = password;
     }
 
-    public UUID getId() {
-        return id;
+
+    public Long getSubscribers() {
+        return subscribers;
     }
 
-    public void setId(UUID id) {
-        this.id = id;
+    public void setSubscribers(Long subscribers) {
+        this.subscribers = subscribers;
     }
 
-    public String getEmail() {
-        return email;
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of();
     }
 
-    public void setEmail(String email) {
-        this.email = email;
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
     }
 
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
     }
 
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(LocalDateTime updatedAt) {
-        this.updatedAt = updatedAt;
-    }
 }

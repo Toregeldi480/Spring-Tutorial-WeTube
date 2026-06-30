@@ -28,16 +28,8 @@ public class JwtService {
         this.userRepository = userRepository;
     }
 
-    public boolean isValidToken(String token) {
-        try {
-            Jwts.parserBuilder().setSigningKey(getSignInKey()).build().parseClaimsJws(token);
-            return true;
-        } catch (ExpiredJwtException e) {
-            System.err.println("Token expired at: " + e.getClaims().getExpiration());
-            return false;
-        } catch (JwtException | IllegalArgumentException e) {
-            return false;
-        }
+    public void validateToken(String token) throws Exception {
+        Jwts.parserBuilder().setSigningKey(getSignInKey()).build().parseClaimsJws(token);
     }
 
     public String generateToken(User user) {

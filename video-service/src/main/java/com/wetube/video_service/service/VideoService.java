@@ -6,7 +6,7 @@ import com.wetube.video_service.dto.VideoDto;
 import com.wetube.video_service.entity.Video;
 import com.wetube.video_service.exception.ResourceNotReadyException;
 import com.wetube.video_service.repository.VideoRepository;
-import com.wetube.video_service.utils.VideoMapper;
+import com.wetube.video_service.util.VideoMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;

@@ -30,14 +30,12 @@ public class GatewayServiceApplication {
 				.route("User-Service", r -> r.path("/auth/**", "/user/**")
 						.filters(f -> f
 								.filter(authFilter.apply(new AuthFilter.Config()))
-								.addRequestHeader("X-Gateway-Token", gatewayToken)
-						)
+								.addRequestHeader("X-Gateway-Token", gatewayToken))
 						.uri("lb://USER-SERVICE/"))
-				.route("Video-Service", r -> r.path("/video/**")
+				.route("Video-Service", r -> r.path("/video/**", "/video-rating/**")
 						.filters(f -> f
 								.filter(authFilter.apply(new AuthFilter.Config()))
-								.addRequestHeader("X-Gateway-Token", gatewayToken)
-						)
+								.addRequestHeader("X-Gateway-Token", gatewayToken))
 						.uri("lb://VIDEO-SERVICE/"))
 				.build();
 	}
