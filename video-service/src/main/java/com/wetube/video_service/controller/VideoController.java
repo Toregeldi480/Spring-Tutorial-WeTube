@@ -46,21 +46,24 @@ public class VideoController {
                 .body(manifest);
     }
 
-//    @GetMapping("/{videoId}/{quality}/playlist.m3u8")
-//    public ResponseEntity<Resource> getQualityManifest(@PathVariable String videoId, @PathVariable String quality) {
-//        Resource manifest = videoService.getQualityManifest(videoId, quality);
-//        return ResponseEntity.ok()
-//                .header(HttpHeaders.CONTENT_TYPE, "application/vnd.apple.mpegurl")
-//                .body(manifest);
-//    }
-//
-//    @GetMapping("/{videoId}/{quality}/{segment}")
-//    public ResponseEntity<Resource> getVideoSegment(@PathVariable String videoId, @PathVariable String quality, @PathVariable String segment) {
-//        Resource segmentResource = videoService.getVideoSegment(videoId, quality, segment);
-//        return ResponseEntity.ok()
-//                .header(HttpHeaders.CONTENT_TYPE, "video/MP2T")
-//                .body(segmentResource);
-//    }
+    // turns out hls.js uses this two endpoints
+    // 1
+    @GetMapping("/{videoId}/{quality}/playlist.m3u8")
+    public ResponseEntity<Resource> getQualityManifest(@PathVariable String videoId, @PathVariable String quality) {
+        Resource manifest = videoService.getQualityManifest(videoId, quality);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_TYPE, "application/vnd.apple.mpegurl")
+                .body(manifest);
+    }
+
+    // 2
+    @GetMapping("/{videoId}/{quality}/{segment}")
+    public ResponseEntity<Resource> getVideoSegment(@PathVariable String videoId, @PathVariable String quality, @PathVariable String segment) {
+        Resource segmentResource = videoService.getVideoSegment(videoId, quality, segment);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_TYPE, "video/MP2T")
+                .body(segmentResource);
+    }
 
     @GetMapping("/{videoId}/metadata")
     public ResponseEntity<VideoDto> getVideoMetadata(@PathVariable String videoId) {
